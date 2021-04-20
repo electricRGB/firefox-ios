@@ -863,6 +863,61 @@ app_menu:
     notification_emails:
       - firefox-ios@mozilla.com
     expires: "2021-09-17"
+  home:
+    type: counter
+    description: |
+        Counts the number of times a user taps Home in the app menu
+    bugs:
+      - https://github.com/mozilla-mobile/firefox-ios/issues/8147
+    data_reviews:
+      - https://github.com/mozilla-mobile/firefox-ios/pull/8167
+    notification_emails:
+      - firefox-ios@mozilla.com
+    expires: "2021-11-01"
+  block_images:
+    type: counter
+    description: |
+        Counts the number of times a user taps Block Images in the app menu
+    bugs:
+      - https://github.com/mozilla-mobile/firefox-ios/issues/8147
+    data_reviews:
+      - https://github.com/mozilla-mobile/firefox-ios/pull/8167
+    notification_emails:
+      - firefox-ios@mozilla.com
+    expires: "2021-11-01"
+  night_mode:
+    type: counter
+    description: |
+        Counts the number of times a user taps Enable Night Mode in the app menu
+    bugs:
+      - https://github.com/mozilla-mobile/firefox-ios/issues/8147
+    data_reviews:
+      - https://github.com/mozilla-mobile/firefox-ios/pull/8167
+    notification_emails:
+      - firefox-ios@mozilla.com
+    expires: "2021-11-01"
+  whats_new:
+    type: counter
+    description: |
+        Counts the number of times a user taps What's New in the app menu
+    bugs:
+      - https://github.com/mozilla-mobile/firefox-ios/issues/8147
+    data_reviews:
+      - https://github.com/mozilla-mobile/firefox-ios/pull/8167
+    notification_emails:
+      - firefox-ios@mozilla.com
+    expires: "2021-11-01"
+  settings:
+    type: counter
+    description: |
+        Counts the number of times a user taps Settings in the app menu
+    bugs:
+      - https://github.com/mozilla-mobile/firefox-ios/issues/8147
+    data_reviews:
+      - https://github.com/mozilla-mobile/firefox-ios/pull/8167
+    notification_emails:
+      - firefox-ios@mozilla.com
+    expires: "2021-11-01"
   logins:
     type: counter
     description: |

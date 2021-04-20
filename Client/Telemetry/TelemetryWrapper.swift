@@ -283,7 +283,7 @@ class TelemetryWrapper {
     }
 }
 
-// Enums for Event telemetry.
+// MARK: - Event telemetry enums
 extension TelemetryWrapper {
     public enum EventCategory: String {
         case action = "action"
@@ -379,6 +379,9 @@ extension TelemetryWrapper {
         case mediumTopSitesWidget = "medium-top-sites-widget"
         case pocketStory = "pocket-story"
         case library = "library"
+        case home = "home"
+        case blockImages = "block-images"
+        case nightMode = "night-mode"
         case logins = "logins-and-passwords"
         case signIntoSync = "sign-into-sync"
         case syncTab = "sync-tab"
@@ -429,7 +432,8 @@ extension TelemetryWrapper {
     static func gleanRecordEvent(category: EventCategory, method: EventMethod, object: EventObject, value: EventValue? = nil, extras: [String: Any]? = nil) {
         let value = value?.rawValue ?? ""
         switch (category, method, object, value, extras) {
-        // Bookmarks
+
+        // MARK: - Bookmarks
         case (.action, .view, .bookmarksPanel, let from, _):
             GleanMetrics.Bookmarks.viewList[from].add()
         case (.action, .add, .bookmark, let from, _):
@@ -438,12 +442,14 @@ extension TelemetryWrapper {
             GleanMetrics.Bookmarks.delete[from].add()
         case (.action, .open, .bookmark, let from, _):
             GleanMetrics.Bookmarks.open[from].add()
-        // Reader Mode
+
+        // MARK: - Reader Mode
         case (.action, .tap, .readerModeOpenButton, _, _):
             GleanMetrics.ReaderMode.open.add()
         case (.action, .tap, .readerModeCloseButton, _, _):
             GleanMetrics.ReaderMode.close.add()
-        // Reading List
+
+        // MARK: - Reading List
         case (.action, .add, .readingListItem, let from, _):
             GleanMetrics.ReadingList.add[from].add()
         case (.action, .delete, .readingListItem, let from, _):
@@ -454,7 +460,8 @@ extension TelemetryWrapper {
             GleanMetrics.ReadingList.markRead.add()
         case (.action, .tap, .readingListItem, EventValue.markAsUnread.rawValue, _):
             GleanMetrics.ReadingList.markUnread.add()
-        // Preferences
+
+        // MARK: - Preferences
         case (.action, .change, .setting, _, let extras):
             if let preference = extras?["pref"] as? String, let to = (extras?["to"] ?? "undefined") as? String {
                 GleanMetrics.Preferences.changed.record(
@@ -464,11 +471,13 @@ extension TelemetryWrapper {
                 let msg = "Uninstrumented pref metric: \(category), \(method), \(object), \(value), \(String(describing: extras))"
                 Sentry.shared.send(message: msg, severity: .debug)
             }
-        // QR Codes
+
+        // MARK: - QR Codes
         case (.action, .scan, .qrCodeText, _, _),
              (.action, .scan, .qrCodeURL, _, _):
             GleanMetrics.QrCode.scanned.add()
-        // Tabs
+
+        // MARK: - Tabs
         case (.action, .add, .tab, let privateOrNormal, _):
             GleanMetrics.Tabs.open[privateOrNormal].add()
         case (.action, .close, .tab, let privateOrNormal, _):
@@ -483,13 +492,16 @@ extension TelemetryWrapper {
             GleanMetrics.Tabs.openTabTray.record()
         case (.action, .close, .tabTray, _, _):
             GleanMetrics.Tabs.closeTabTray.record()
-        // Settings Menu
+
+        // MARK: - Settings Menu
         case (.action, .open, .settingsMenuSetAsDefaultBrowser, _, _):
             GleanMetrics.SettingsMenu.setAsDefaultBrowserPressed.add()
-        // Start Search Button
+
+        // MARK: - Start Search Button
         case (.action, .tap, .startSearchButton, _, _):
             GleanMetrics.Search.startSearchPressed.add()
-        // Default Browser
+
+        // MARK: - Default Browser
         case (.action, .tap, .dismissDefaultBrowserCard, _, _):
             GleanMetrics.DefaultBrowserCard.dismissPressed.add()
         case (.action, .tap, .goToSettingsDefaultBrowserCard, _, _):
@@ -500,7 +512,8 @@ extension TelemetryWrapper {
             GleanMetrics.DefaultBrowserOnboarding.dismissPressed.add()
         case (.action, .tap, .goToSettingsDefaultBrowserOnboarding, _, _):
             GleanMetrics.DefaultBrowserOnboarding.goToSettingsPressed.add()
-        // Widget
+
+        // MARK: - Widget
         case (.action, .open, .mediumTabsOpenUrl, _, _):
             GleanMetrics.Widget.mTabsOpenUrl.add()
         case (.action, .open, .largeTabsOpenUrl, _, _):
@@ -519,10 +532,12 @@ extension TelemetryWrapper {
             GleanMetrics.Widget.mTopSitesWidget.add()
         case (.action, .tap, .pocketStory, _, _):
             GleanMetrics.Pocket.openStory.add()
-        // Library
+
+        // MARK: - Library
         case (.action, .tap, .libraryPanel, let type, _):
             GleanMetrics.Library.panelPressed[type].add()
-        // Sync
+
+        // MARK: - Sync
         case (.action, .open, .syncTab, _, _):
             GleanMetrics.Sync.openTab.add()
         case (.action, .tap, .syncHomeShortcut, _, _):
@@ -531,7 +546,8 @@ extension TelemetryWrapper {
             GleanMetrics.Sync.signInSyncPressed.add()
         case (.action, .tap, .syncCreateAccount, _, _):
             GleanMetrics.Sync.createAccountPressed.add()
-        // Experiments
+
+        // MARK: - Experiments
         case (.enrollment, .add, .experimentEnrollment, _, let extras):
             if let id = extras?["Experiment id"] as? String, let name = extras?["Experiment name"] as? String, let variant = extras?["Experiment variant"] as? String {
                 GleanMetrics.Experiments.experimentEnrollment.record(
@@ -542,13 +558,24 @@ extension TelemetryWrapper {
                 let msg = "Uninstrumented pref metric: \(category), \(method), \(object), \(value), \(String(describing: extras))"
                 Sentry.shared.send(message: msg, severity: .debug)
             }
-        // App menu
-        case (.action, .tap, .library, _, _):
-            GleanMetrics.AppMenu.library.add()
-        case (.action, .tap, .logins, _, _):
-            GleanMetrics.AppMenu.logins.add()
+
+        // MARK: - App menu
         case (.action, .tap, .signIntoSync, _, _):
             GleanMetrics.AppMenu.signIntoSync.add()
+        case (.action, .tap, .logins, _, _):
+            GleanMetrics.AppMenu.logins.add()
+        case (.action, .tap, .home, _, _):
+            GleanMetrics.AppMenu.home.add()
+        case (.action, .tap, .library, _, _):
+            GleanMetrics.AppMenu.library.add()
+        case (.action, .tap, .blockImages, _, _):
+            GleanMetrics.AppMenu.blockImages.add()
+        case (.action, .tap, .nightMode, _, _):
+            GleanMetrics.AppMenu.nightMode.add()
+        case (.action, .tap, .whatsNew, _, _):
+            GleanMetrics.AppMenu.whatsNew.add()
+        case (.action, .tap, .settings, _, _):
+            GleanMetrics.AppMenu.settings.add()
         default:
             let msg = "Uninstrumented metric recorded: \(category), \(method), \(object), \(value), \(String(describing: extras))"
             Sentry.shared.send(message: msg, severity: .debug)

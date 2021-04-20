@@ -25,6 +25,7 @@ extension PhotonActionSheetProtocol {
             } else if let homePanelURL = page.url {
                 tab.loadRequest(PrivilegedRequest(url: homePanelURL) as URLRequest)
             }
+            TelemetryWrapper.recordEvent(category: .action, method: .tap, object: .home)
         }
 
         return [openHomePage, openLibrary]
@@ -36,6 +37,7 @@ extension PhotonActionSheetProtocol {
         let noImageEnabled = NoImageModeHelper.isActivated(profile.prefs)
         let noImageMode = PhotonActionSheetItem(title: Strings.AppMenuNoImageMode, iconString: "menu-NoImageMode", isEnabled: noImageEnabled, accessory: .Switch, badgeIconNamed: "menuBadge") { action,_ in
             NoImageModeHelper.toggle(isEnabled: action.isEnabled, profile: self.profile, tabManager: self.tabManager)
+            TelemetryWrapper.recordEvent(category: .action, method: .tap, object: .blockImages)
         }
 
         items.append(noImageMode)
@@ -53,6 +55,7 @@ extension PhotonActionSheetProtocol {
                 ThemeManager.instance.current = NormalTheme()
                 NightModeHelper.setEnabledDarkTheme(self.profile.prefs, darkTheme: false)
             }
+            TelemetryWrapper.recordEvent(category: .action, method: .tap, object: .nightMode)
         }
         items.append(nightMode)
 
@@ -74,6 +77,7 @@ extension PhotonActionSheetProtocol {
             DispatchQueue.main.async {
                 vcDelegate.present(controller, animated: true, completion: nil)
             }
+            TelemetryWrapper.recordEvent(category: .action, method: .tap, object: .settings)
         }
         items.append(openSettings)
 
