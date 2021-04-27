@@ -45,6 +45,7 @@ extension PhotonActionSheetProtocol {
                 guard let url = tab.url else { return }
 
                 self.share(fileURL: url, buttonView: buttonView, presentableVC: presentableVC)
+                TelemetryWrapper.recordEvent(.sharePageWith, from: .pageMenu, forCategory: .action, forAction: .tap)
             }
 
             return [[shareFile]]
@@ -57,10 +58,12 @@ extension PhotonActionSheetProtocol {
         } else {
             toggleActionTitle = tab.changedUserAgent ? Strings.AppMenuViewMobileSiteTitleString : Strings.AppMenuViewDesktopSiteTitleString
         }
+
         let toggleDesktopSite = PhotonActionSheetItem(title: toggleActionTitle, iconString: "menu-RequestDesktopSite", isEnabled: tab.changedUserAgent, badgeIconNamed: "menuBadge") { _, _ in
             if let url = tab.url {
                 tab.toggleChangeUserAgent()
                 Tab.ChangeUserAgent.updateDomainList(forUrl: url, isChangedUA: tab.changedUserAgent, isPrivate: tab.isPrivate)
+                TelemetryWrapper.recordEvent(.requestDesktopSite, from: .pageMenu, forCategory: .action, forAction: .tap)
             }
         }
 

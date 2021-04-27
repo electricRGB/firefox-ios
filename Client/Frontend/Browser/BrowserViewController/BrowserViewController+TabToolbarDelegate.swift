@@ -72,7 +72,7 @@ extension BrowserViewController: TabToolbarDelegate, PhotonActionSheetProtocol {
         }
         whatsNewAction = PhotonActionSheetItem(title: Strings.WhatsNewString, iconString: "whatsnew", isEnabled: showBadgeForWhatsNew, badgeIconNamed: "menuBadge") { _, _ in
             if let whatsNewTopic = AppInfo.whatsNewTopic, let whatsNewURL = SupportUtils.URLForTopic(whatsNewTopic) {
-                TelemetryWrapper.recordEvent(category: .action, method: .tap, object: .whatsNew)
+                TelemetryWrapper.recordEvent(.whatsNew, from: .appMenu, forCategory: .action, forAction: .open)
                 self.openURLInNewTab(whatsNewURL)
             }
         }
@@ -96,7 +96,7 @@ extension BrowserViewController: TabToolbarDelegate, PhotonActionSheetProtocol {
                 loginsVC.shownFromAppMenu = true
                 let navController = ThemedNavigationController(rootViewController: loginsVC)
                 self.present(navController, animated: true)
-                TelemetryWrapper.recordEvent(category: .action, method: .tap, object: .logins)
+                TelemetryWrapper.recordEvent(.logins, from: .appMenu, forCategory: .action, forAction: .tap)
             }
         }
 

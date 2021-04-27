@@ -323,6 +323,7 @@ extension TelemetryWrapper {
         case bookmark = "bookmark"
         case bookmarksPanel = "bookmarks-panel"
         case download = "download"
+        case whatsNew = "what-new"
         case downloadLinkButton = "download-link-button"
         case downloadNowButton = "download-now-button"
         case downloadsPanel = "downloads-panel"
@@ -341,7 +342,6 @@ extension TelemetryWrapper {
         case trackingProtectionMenu = "tracking-protection-menu"
         case url = "url"
         case searchText = "searchText"
-        case whatsNew = "whats-new"
         case dismissUpdateCoverSheetAndStartBrowsing = "dismissed-update-cover_sheet_and_start_browsing"
         case dismissedUpdateCoverSheet = "dismissed-update-cover-sheet"
         case dismissedETPCoverSheet = "dismissed-etp-sheet"
@@ -378,10 +378,6 @@ extension TelemetryWrapper {
         case mediumQuickActionClosePrivate = "medium-quick-action-close-private"
         case mediumTopSitesWidget = "medium-top-sites-widget"
         case pocketStory = "pocket-story"
-        case library = "library"
-        case home = "home"
-        case blockImages = "block-images"
-        case nightMode = "night-mode"
         case logins = "logins-and-passwords"
         case signIntoSync = "sign-into-sync"
         case syncTab = "sync-tab"
@@ -389,6 +385,7 @@ extension TelemetryWrapper {
         case syncSignIn = "sync-sign-in"
         case syncCreateAccount = "sync-create-account"
         case libraryPanel = "library-panel"
+
     }
 
     public enum EventValue: String {
@@ -423,6 +420,8 @@ extension TelemetryWrapper {
         case syncPanel = "sync-panel"
     }
 
+    // TODO: When we refactor all telemetry events, we should mark the
+//    @available(*, deprecated, message: "Please use the new `record` function instead.")
     public static func recordEvent(category: EventCategory, method: EventMethod, object: EventObject, value: EventValue? = nil, extras: [String: Any]? = nil) {
         Telemetry.default.recordEvent(category: category.rawValue, method: method.rawValue, object: object.rawValue, value: value?.rawValue ?? "", extras: extras)
 
@@ -564,20 +563,122 @@ extension TelemetryWrapper {
             GleanMetrics.AppMenu.signIntoSync.add()
         case (.action, .tap, .logins, _, _):
             GleanMetrics.AppMenu.logins.add()
-        case (.action, .tap, .home, _, _):
-            GleanMetrics.AppMenu.home.add()
-        case (.action, .tap, .library, _, _):
-            GleanMetrics.AppMenu.library.add()
-        case (.action, .tap, .blockImages, _, _):
-            GleanMetrics.AppMenu.blockImages.add()
-        case (.action, .tap, .nightMode, _, _):
-            GleanMetrics.AppMenu.nightMode.add()
-        case (.action, .tap, .whatsNew, _, _):
-            GleanMetrics.AppMenu.whatsNew.add()
-        case (.action, .tap, .settings, _, _):
-            GleanMetrics.AppMenu.settings.add()
         default:
             let msg = "Uninstrumented metric recorded: \(category), \(method), \(object), \(value), \(String(describing: extras))"
+            Sentry.shared.send(message: msg, severity: .debug)
+        }
+    }
+}
+
+// Telemetry Interface as of April 2021 (and beyond!)
+extension TelemetryWrapper {
+
+    enum TelemetryAction: String {
+        // General Actions
+        case settings = "settings"
+        case whatsNew = "whats-new"
+        case signInToSync = "sign-in-to-sync"
+
+        // App Menu
+        case logins = "logins"
+        case library = "library"
+        case home = "home"
+        case blockImages = "block-images"
+        case nightMode = "night-mode"
+
+        // Page Action Menu
+        case sharePageWith = "share-page-with"
+        case bookmarkThisPage = "bookmark-this-page"
+        case addToReadingList = "add-to-reading-list"
+        case sendToDevice = "send-to-device"
+        case copyAddress = "copy-address"
+        case reportSiteIssue = "report-site-issue"
+        case findInPage = "find-in-page"
+        case requestDesktopSite = "request-desktop-site"
+        case pinToTopSites = "pin-to-top-sites"
+    }
+
+    enum TelemetryLocation: String {
+        case appMenu = "app-menu"
+        case home = "home"
+        case pageMenu = "page-menu"
+    }
+
+    /// Describes the category of action a user takes, to be used in the `category` field of `recordEvent`
+    enum TelemetryCategory: String {
+        case action = "action"
+    }
+
+    /// Describes the types of action a user takes, to be used in the `method` field of `recordEvent`
+    enum TelemetryActionType: String {
+        case tap = "tap"
+        case open = "open"
+    }
+
+    /// Describes values to be used in the `extra` field of `recordEvent`
+    enum TelemetryExtraValues: String {
+        // Common keys
+        case value = "value"
+
+        // Values
+        case markAsRead = "mark-as-read"
+        case markAsUnread = "mark-as-unread"
+    }
+
+    /// Records and sends a telemetry event to GLEAN.
+    /// - Parameters:
+    ///   - event: The telemetry action that is to be recorded
+    ///   - location: The location where the user initiates the event
+    ///   - category: The type of event it is
+    ///   - action: The type of action the user's event initiates
+    ///   - extras: Any extra values that might be recorded by the event
+    public static func recordEvent(_ event: TelemetryAction, from location: TelemetryLocation, forCategory category: TelemetryCategory, forAction action: TelemetryActionType, extras: [String: Any]? = nil) {
+
+        gleanRecordEvent(event: event, location: location, category: category, action: action, extras: extras)
+    }
+
+    static func gleanRecordEvent(event: TelemetryAction, location: TelemetryLocation, category: TelemetryCategory, action: TelemetryActionType, extras: [String: Any]? = nil) {
+
+        switch (event, location, category, action, extras) {
+
+        // MARK: - App Menu
+        case (.signInToSync, .appMenu, .action, .tap, _):
+            GleanMetrics.AppMenu.signIntoSync.add()
+        case (.logins, .appMenu, .action, .tap, _):
+            GleanMetrics.AppMenu.logins.add()
+        case (.home, .appMenu, .action, .tap, _):
+            GleanMetrics.AppMenu.home.add()
+        case (.library, .appMenu, .action, .tap, _):
+            GleanMetrics.Library.viewLibrary[TelemetryLocation.appMenu.rawValue].add()
+        case (.blockImages, .appMenu, .action, .tap, _):
+            GleanMetrics.AppMenu.blockImages.add()
+        case (.nightMode, .appMenu, .action, .tap, _):
+            GleanMetrics.AppMenu.nightMode.add()
+        case (.whatsNew, .appMenu, .action, .tap, _):
+            GleanMetrics.AppMenu.whatsNew.add()
+        case (.settings, .appMenu, .action, .tap, _):
+            GleanMetrics.AppMenu.settings.add()
+
+        // MARK: - Page menu
+        case (.sharePageWith, .appMenu, .action, .tap, _):
+            GleanMetrics.PageActionMenu.sharePageWith.add()
+        case (.bookmarkThisPage, .appMenu, .action, .tap, _):
+            GleanMetrics.PageActionMenu.bookmarkThisPage.add()
+        case (.sendToDevice, .appMenu, .action, .tap, _):
+            GleanMetrics.PageActionMenu.sendToDevice.add()
+        case (.copyAddress, .appMenu, .action, .tap, _):
+            GleanMetrics.PageActionMenu.copyAddress.add()
+        case (.reportSiteIssue, .appMenu, .action, .tap, _):
+            GleanMetrics.PageActionMenu.reportSiteIssue.add()
+        case (.findInPage, .appMenu, .action, .tap, _):
+            GleanMetrics.PageActionMenu.findInPage.add()
+        case (.requestDesktopSite, .appMenu, .action, .tap, _):
+            GleanMetrics.PageActionMenu.requestDesktopSite.add()
+        case (.pinToTopSites, .appMenu, .action, .tap, _):
+            GleanMetrics.PageActionMenu.pinToTopSites.add()
+
+        default:
+            let msg = "Uninstrumented metric recorded: \(category), \(action), \(event), \(location), \(String(describing: extras))"
             Sentry.shared.send(message: msg, severity: .debug)
         }
     }
